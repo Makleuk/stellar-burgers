@@ -1,52 +1,30 @@
-import { memo } from 'react';
+import { FeedInfoUI } from '@ui';
+import type { TOrder } from '@utils-types';
+import type { FC } from 'react';
 
-import type { FeedInfoUIProps, HalfColumnProps, TColumnProps } from './type';
+import {
+  selectFeedOrders,
+  selectFeedTotal,
+  selectFeedTotalToday,
+} from '../../services/slices/feed-slice';
+import { useSelector } from '../../services/store';
 
-import styles from './feed-info.module.css';
+const MAX_ORDERS_IN_COLUMN = 20;
 
-export const FeedInfoUI = memo(function FeedInfoUI({
-  feed,
-  readyOrders,
-  pendingOrders,
-}: FeedInfoUIProps): React.JSX.Element {
-  const { total, totalToday } = feed;
+const getOrders = (orders: TOrder[], status: string): number[] =>
+  orders
+    .filter((item) => item.status === status)
+    .map((item) => item.number)
+    .slice(0, MAX_ORDERS_IN_COLUMN);
 
-  return (
-    <section>
-      <div className={styles.columns}>
-        <HalfColumn orders={readyOrders} title={'Готовы'} textColor={'blue'} />
-        <HalfColumn orders={pendingOrders} title={'В работе'} />
-      </div>
-      <Column title={'Выполнено за все время'} content={total} />
-      <Column title={'Выполнено за сегодня'} content={totalToday} />
-    </section>
-  );
-});
+export const FeedInfo: FC = () => {
+  const orders = useSelector(selectFeedOrders);
+  const total = useSelector(selectFeedTotal);
+  const totalToday = useSelector(selectFeedTotalToday);
+  const feed = { total, totalToday };
 
-const HalfColumn = ({
-  orders,
-  title,
-  textColor,
-}: HalfColumnProps): React.JSX.Element => (
-  <div className={`pr-6 ${styles.column}`}>
-    <h3 className={`text text_type_main-medium ${styles.title}`}>{title}:</h3>
-    <ul className={`pt-6  ${styles.list}`}>
-      {orders.map((item, index) => (
-        <li
-          className={`text text_type_digits-default ${styles.list_item}`}
-          style={{ color: textColor === 'blue' ? '#00cccc' : '#F2F2F3' }}
-          key={index}
-        >
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
-);
+  const readyOrders = getOrders(orders, 'done');
+  const pendingOrders = getOrders(orders, 'pending');
 
-const Column = ({ title, content }: TColumnProps): React.JSX.Element => (
-  <>
-    <h3 className={`pt-15 text text_type_main-medium ${styles.title}`}>{title}:</h3>
-    <p className={`text text_type_digits-large ${styles.content}`}>{content}</p>
-  </>
-);
+  return <FeedInfoUI readyOrders={readyOrders} pendingOrders={pendingOrders} feed={feed} />;
+};

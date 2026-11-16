@@ -1,28 +1,35 @@
-import { BurgerIngredient } from '@components';
+import { forwardRef, useMemo } from 'react';
 
-import type { TIngredientsCategoryUIProps } from './type';
+import { selectConstructorItems } from '../../services/slices/constructor-slice';
+import { useSelector } from '../../services/store';
+import { IngredientsCategoryUI } from '../ui/ingredients-category';
+import type { TIngredientsCategoryProps } from './type';
 
-import styles from './ingredients-category.module.css';
+const BUN_COUNT = 2;
 
-export const IngredientsCategoryUI = ({
-  title,
-  titleRef,
-  ingredients,
-  ingredientsCounters,
-  ref,
-}: TIngredientsCategoryUIProps): React.JSX.Element => (
-  <>
-    <h3 className="text text_type_main-medium mt-10 mb-6" ref={titleRef}>
-      {title}
-    </h3>
-    <ul className={styles.items} ref={ref}>
-      {ingredients.map((ingredient) => (
-        <BurgerIngredient
-          ingredient={ingredient}
-          key={ingredient._id}
-          count={ingredientsCounters[ingredient._id]}
-        />
-      ))}
-    </ul>
-  </>
+export const IngredientsCategory = forwardRef<HTMLUListElement, TIngredientsCategoryProps>(
+  ({ title, titleRef, ingredients }, ref) => {
+    const burgerConstructor = useSelector(selectConstructorItems);
+
+    const ingredientsCounters = useMemo(() => {
+      const counters: Record<string, number> = {};
+      burgerConstructor.ingredients.forEach((ingredient) => {
+        counters[ingredient._id] = (counters[ingredient._id] ?? 0) + 1;
+      });
+      if (burgerConstructor.bun) {
+        counters[burgerConstructor.bun._id] = BUN_COUNT;
+      }
+      return counters;
+    }, [burgerConstructor]);
+
+    return (
+      <IngredientsCategoryUI
+        title={title}
+        titleRef={titleRef}
+        ingredients={ingredients}
+        ingredientsCounters={ingredientsCounters}
+        ref={ref}
+      />
+    );
+  }
 );

@@ -1,97 +1,60 @@
-import { BurgerConstructorElement, Modal } from '@components';
+import { BurgerConstructorUI } from '@ui';
+import { useMemo, type FC } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { selectConstructorItems } from '../../services/slices/constructor-slice';
 import {
-  Button,
-  ConstructorElement,
-  CurrencyIcon,
-} from '@krgaa/react-developer-burger-ui-components';
-import { Preloader, OrderDetailsUI } from '@ui';
+  createOrder,
+  resetOrderModal,
+  selectOrderModalData,
+  selectOrderRequest,
+} from '../../services/slices/order-slice';
+import { selectUser } from '../../services/slices/user-slice';
+import { useDispatch, useSelector } from '../../services/store';
 
-import type { BurgerConstructorUIProps } from './type';
-import type { TConstructorIngredient } from '@utils-types';
+const BUN_COUNT = 2;
 
-import styles from './burger-constructor.module.css';
+export const BurgerConstructor: FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const constructorItems = useSelector(selectConstructorItems);
+  const orderRequest = useSelector(selectOrderRequest);
+  const orderModalData = useSelector(selectOrderModalData);
+  const user = useSelector(selectUser);
 
-export const BurgerConstructorUI = ({
-  constructorItems,
-  orderRequest,
-  price,
-  orderModalData,
-  onOrderClick,
-  closeOrderModal,
-}: BurgerConstructorUIProps): React.JSX.Element => (
-  <section className={styles.burger_constructor}>
-    {constructorItems.bun ? (
-      <div className={`${styles.element} mb-4 mr-4`}>
-        <ConstructorElement
-          type="top"
-          isLocked
-          text={`${constructorItems.bun.name} (верх)`}
-          price={constructorItems.bun.price}
-          thumbnail={constructorItems.bun.image}
-        />
-      </div>
-    ) : (
-      <div
-        className={`${styles.noBuns} ${styles.noBunsTop} ml-8 mb-4 mr-5 text text_type_main-default`}
-      >
-        Выберите булки
-      </div>
-    )}
-    <ul className={styles.elements}>
-      {constructorItems.ingredients.length > 0 ? (
-        constructorItems.ingredients.map(
-          (item: TConstructorIngredient, index: number) => (
-            <BurgerConstructorElement
-              ingredient={item}
-              index={index}
-              totalItems={constructorItems.ingredients.length}
-              key={item.id}
-            />
-          )
-        )
-      ) : (
-        <li className={`${styles.noBuns} ml-8 mb-4 mr-5 text text_type_main-default`}>
-          Выберите начинку
-        </li>
-      )}
-    </ul>
-    {constructorItems.bun ? (
-      <div className={`${styles.element} mt-4 mr-4`}>
-        <ConstructorElement
-          type="bottom"
-          isLocked
-          text={`${constructorItems.bun.name} (низ)`}
-          price={constructorItems.bun.price}
-          thumbnail={constructorItems.bun.image}
-        />
-      </div>
-    ) : (
-      <div
-        className={`${styles.noBuns} ${styles.noBunsBottom} ml-8 mb-4 mr-5 text text_type_main-default`}
-      >
-        Выберите булки
-      </div>
-    )}
-    <div className={`${styles.total} mt-10 mr-4`}>
-      <div className={`${styles.cost} mr-10`}>
-        <p className={`text ${styles.text} mr-2`}>{price}</p>
-        <CurrencyIcon type="primary" />
-      </div>
-      <Button htmlType="button" type="primary" size="large" onClick={onOrderClick}>
-        Оформить заказ
-      </Button>
-    </div>
+  const price = useMemo(
+    () =>
+      (constructorItems.bun ? constructorItems.bun.price * BUN_COUNT : 0) +
+      constructorItems.ingredients.reduce((sum, item) => sum + item.price, 0),
+    [constructorItems]
+  );
 
-    {orderRequest && (
-      <Modal onClose={closeOrderModal} title={'Оформляем заказ...'}>
-        <Preloader />
-      </Modal>
-    )}
+  const onOrderClick = () => {
+    if (!constructorItems.bun || orderRequest) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    const ingredientIds = [
+      constructorItems.bun._id,
+      ...constructorItems.ingredients.map((item) => item._id),
+      constructorItems.bun._id,
+    ];
+    dispatch(createOrder(ingredientIds));
+  };
 
-    {orderModalData && (
-      <Modal onClose={closeOrderModal} title={orderRequest ? 'Оформляем заказ...' : ''}>
-        <OrderDetailsUI orderNumber={orderModalData.number} />
-      </Modal>
-    )}
-  </section>
-);
+  const closeOrderModal = () => {
+    dispatch(resetOrderModal());
+  };
+
+  return (
+    <BurgerConstructorUI
+      price={price}
+      orderRequest={orderRequest}
+      constructorItems={constructorItems}
+      orderModalData={orderModalData}
+      onOrderClick={onOrderClick}
+      closeOrderModal={closeOrderModal}
+    />
+  );
+};

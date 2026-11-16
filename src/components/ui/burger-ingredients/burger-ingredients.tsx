@@ -1,61 +1,56 @@
-import { IngredientsCategory } from '@components';
-import { Tab } from '@krgaa/react-developer-burger-ui-components';
-import { memo } from 'react';
+import type { TTabMode } from '@utils-types';
+import { useEffect, useRef, useState, type FC } from 'react';
+import { useInView } from 'react-intersection-observer';
 
-import type { BurgerIngredientsUIProps } from './type';
+import { selectIngredients } from '../../services/slices/ingredients-slice';
+import { useSelector } from '../../services/store';
+import { BurgerIngredientsUI } from '../ui/burger-ingredients';
 
-import styles from './burger-ingredients.module.css';
+export const BurgerIngredients: FC = () => {
+  const ingredients = useSelector(selectIngredients);
+  const buns = ingredients.filter((item) => item.type === 'bun');
+  const mains = ingredients.filter((item) => item.type === 'main');
+  const sauces = ingredients.filter((item) => item.type === 'sauce');
 
-export const BurgerIngredientsUI = memo(function BurgerIngredientsUI({
-  currentTab,
-  buns,
-  mains,
-  sauces,
-  titleBunRef,
-  titleMainRef,
-  titleSaucesRef,
-  bunsRef,
-  mainsRef,
-  saucesRef,
-  onTabClick,
-}: BurgerIngredientsUIProps): React.JSX.Element {
+  const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
+  const titleBunRef = useRef<HTMLHeadingElement>(null);
+  const titleMainRef = useRef<HTMLHeadingElement>(null);
+  const titleSaucesRef = useRef<HTMLHeadingElement>(null);
+
+  const [bunsRef, inViewBuns] = useInView({ threshold: 0 });
+  const [mainsRef, inViewFilling] = useInView({ threshold: 0 });
+  const [saucesRef, inViewSauces] = useInView({ threshold: 0 });
+
+  useEffect(() => {
+    if (inViewBuns) {
+      setCurrentTab('bun');
+    } else if (inViewSauces) {
+      setCurrentTab('sauce');
+    } else if (inViewFilling) {
+      setCurrentTab('main');
+    }
+  }, [inViewBuns, inViewFilling, inViewSauces]);
+
+  const onTabClick = (tab: string) => {
+    setCurrentTab(tab as TTabMode);
+    if (tab === 'bun') titleBunRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (tab === 'main') titleMainRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (tab === 'sauce') titleSaucesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <>
-      <section className={styles.burger_ingredients}>
-        <nav>
-          <ul className={styles.menu}>
-            <Tab value="bun" active={currentTab === 'bun'} onClick={onTabClick}>
-              Булки
-            </Tab>
-            <Tab value="main" active={currentTab === 'main'} onClick={onTabClick}>
-              Начинки
-            </Tab>
-            <Tab value="sauce" active={currentTab === 'sauce'} onClick={onTabClick}>
-              Соусы
-            </Tab>
-          </ul>
-        </nav>
-        <div className={styles.content}>
-          <IngredientsCategory
-            title="Булки"
-            titleRef={titleBunRef}
-            ingredients={buns}
-            ref={bunsRef}
-          />
-          <IngredientsCategory
-            title="Начинки"
-            titleRef={titleMainRef}
-            ingredients={mains}
-            ref={mainsRef}
-          />
-          <IngredientsCategory
-            title="Соусы"
-            titleRef={titleSaucesRef}
-            ingredients={sauces}
-            ref={saucesRef}
-          />
-        </div>
-      </section>
-    </>
+    <BurgerIngredientsUI
+      currentTab={currentTab}
+      buns={buns}
+      mains={mains}
+      sauces={sauces}
+      titleBunRef={titleBunRef}
+      titleMainRef={titleMainRef}
+      titleSaucesRef={titleSaucesRef}
+      bunsRef={bunsRef}
+      mainsRef={mainsRef}
+      saucesRef={saucesRef}
+      onTabClick={onTabClick}
+    />
   );
-});
+};

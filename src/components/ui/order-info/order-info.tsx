@@ -1,51 +1,57 @@
-import { OrderStatus } from '@components';
-import {
-  CurrencyIcon,
-  FormattedDate,
-} from '@krgaa/react-developer-burger-ui-components';
-import { memo } from 'react';
+import { OrderInfoUI, Preloader } from '@ui';
+import type { TIngredient } from '@utils-types';
+import { useEffect, useMemo, type FC } from 'react';
+import { useParams } from 'react-router-dom';
 
-import type { OrderInfoUIProps } from './type';
+import { selectOrderByNumber } from '../../services/selectors/order-selectors';
+import { selectIngredients } from '../../services/slices/ingredients-slice';
+import { fetchOrderByNumber } from '../../services/slices/order-slice';
+import { useDispatch, useSelector } from '../../services/store';
 
-import styles from './order-info.module.css';
+type TIngredientsWithCount = Record<string, TIngredient & { count: number }>;
 
-export const OrderInfoUI = memo(function OrderInfoUI({
-  orderInfo,
-}: OrderInfoUIProps): React.JSX.Element {
-  return (
-    <div className={styles.wrap}>
-      <h3 className={`text text_type_main-medium  pb-3 pt-10 ${styles.header}`}>
-        {orderInfo.name}
-      </h3>
-      <OrderStatus status={orderInfo.status} />
-      <p className={`text text_type_main-medium pt-15 pb=6`}>Состав:</p>
-      <ul className={`${styles.list} mb-8`}>
-        {Object.values(orderInfo.ingredientsInfo).map((item, index) => (
-          <li className={`pb-4 pr-6 ${styles.item}`} key={index}>
-            <div className={styles.img_wrap}>
-              <div className={styles.border}>
-                <img className={styles.img} src={item.image_mobile} alt={item.name} />
-              </div>
-            </div>
-            <span className="text text_type_main-default pl-4">{item.name}</span>
-            <span
-              className={`text text_type_digits-default pl-4 pr-4 ${styles.quantity}`}
-            >
-              {item.count} x {item.price}
-            </span>
-            <CurrencyIcon type={'primary'} />
-          </li>
-        ))}
-      </ul>
-      <div className={styles.bottom}>
-        <p className="text text_type_main-default text_color_inactive">
-          <FormattedDate date={orderInfo.date} />
-        </p>
-        <span className={`text text_type_digits-default pr-4 ${styles.total}`}>
-          {orderInfo.total}
-        </span>
-        <CurrencyIcon type={'primary'} />
-      </div>
-    </div>
-  );
-});
+export const OrderInfo: FC = () => {
+  const dispatch = useDispatch();
+  const { number } = useParams();
+  const orderNumber = Number(number);
+  const orderData = useSelector(selectOrderByNumber(orderNumber));
+  const ingredients = useSelector(selectIngredients);
+
+  useEffect(() => {
+    if (!orderData) {
+      dispatch(fetchOrderByNumber(orderNumber));
+    }
+  }, [dispatch, orderData, orderNumber]);
+
+  const orderInfo = useMemo(() => {
+    if (!orderData || !ingredients.length) return null;
+
+    const date = new Date(orderData.createdAt);
+    const ingredientsInfo = orderData.ingredients.reduce(
+      (acc: TIngredientsWithCount, itemId) => {
+        if (acc[itemId]) {
+          acc[itemId].count++;
+        } else {
+          const ingredient = ingredients.find((item) => item._id === itemId);
+          if (ingredient) {
+            acc[itemId] = { ...ingredient, count: 1 };
+          }
+        }
+        return acc;
+      },
+      {}
+    );
+    const total = Object.values(ingredientsInfo).reduce(
+      (sum, item) => sum + item.price * item.count,
+      0
+    );
+
+    return { ...orderData, ingredientsInfo, date, total };
+  }, [orderData, ingredients]);
+
+  if (!orderInfo) {
+    return <Preloader />;
+  }
+
+  return <OrderInfoUI orderInfo={orderInfo} />;
+};

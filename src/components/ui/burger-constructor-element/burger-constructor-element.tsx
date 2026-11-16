@@ -1,37 +1,35 @@
-import {
-  ConstructorElement,
-  MoveButton,
-} from '@krgaa/react-developer-burger-ui-components';
-import { memo } from 'react';
+import { BurgerConstructorElementUI } from '@ui';
+import { memo, type FC } from 'react';
 
-import type { BurgerConstructorElementUIProps } from './type';
+import { moveIngredient, removeIngredient } from '../../services/slices/constructor-slice';
+import { useDispatch } from '../../services/store';
+import type { BurgerConstructorElementProps } from './type';
 
-import styles from './burger-constructor-element.module.css';
+export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(
+  ({ ingredient, index, totalItems }) => {
+    const dispatch = useDispatch();
 
-export const BurgerConstructorElementUI = memo(function BurgerConstructorElementUI({
-  ingredient,
-  index,
-  totalItems,
-  handleMoveUp,
-  handleMoveDown,
-  handleClose,
-}: BurgerConstructorElementUIProps): React.JSX.Element {
-  return (
-    <li className={`${styles.element} mb-4 mr-2`}>
-      <MoveButton
-        handleMoveDown={handleMoveDown}
+    const handleMoveDown = () => {
+      dispatch(moveIngredient({ from: index, to: index + 1 }));
+    };
+
+    const handleMoveUp = () => {
+      dispatch(moveIngredient({ from: index, to: index - 1 }));
+    };
+
+    const handleClose = () => {
+      dispatch(removeIngredient(ingredient.id));
+    };
+
+    return (
+      <BurgerConstructorElementUI
+        ingredient={ingredient}
+        index={index}
+        totalItems={totalItems}
         handleMoveUp={handleMoveUp}
-        isUpDisabled={index === 0}
-        isDownDisabled={index === totalItems - 1}
+        handleMoveDown={handleMoveDown}
+        handleClose={handleClose}
       />
-      <div className={`${styles.element_fullwidth} ml-2`}>
-        <ConstructorElement
-          text={ingredient.name}
-          price={ingredient.price}
-          thumbnail={ingredient.image}
-          handleClose={handleClose}
-        />
-      </div>
-    </li>
-  );
-});
+    );
+  }
+);

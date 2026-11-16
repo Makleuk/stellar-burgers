@@ -1,36 +1,18 @@
-import { memo } from 'react';
+import { IngredientDetailsUI, Preloader } from '@ui';
+import type { FC } from 'react';
+import { useParams } from 'react-router-dom';
 
-import type { IngredientDetailsUIProps } from './type';
+import { selectIngredients } from '../../services/slices/ingredients-slice';
+import { useSelector } from '../../services/store';
 
-import styles from './ingredient-details.module.css';
+export const IngredientDetails: FC = () => {
+  const { id } = useParams();
+  const ingredients = useSelector(selectIngredients);
+  const ingredientData = ingredients.find((ingredient) => ingredient._id === id);
 
-export const IngredientDetailsUI = memo(function IngredientDetailsUI({
-  ingredientData,
-}: IngredientDetailsUIProps): React.JSX.Element {
-  const { name, image_large, calories, proteins, fat, carbohydrates } = ingredientData;
+  if (!ingredientData) {
+    return <Preloader />;
+  }
 
-  return (
-    <div className={styles.content}>
-      <img alt="изображение ингредиента." src={image_large} />
-      <h3 className="text text_type_main-medium mt-2 mb-4">{name}</h3>
-      <ul className={`${styles.nutritional_values} text_type_main-default`}>
-        <li className={styles.nutritional_value}>
-          <p className="text mb-2">Калории, ккал</p>
-          <p className={`text text_type_digits-default`}>{calories}</p>
-        </li>
-        <li className={styles.nutritional_value}>
-          <p className="text mb-2">Белки, г</p>
-          <p className={`text text_type_digits-default`}>{proteins}</p>
-        </li>
-        <li className={styles.nutritional_value}>
-          <p className="text mb-2">Жиры, г</p>
-          <p className={`text text_type_digits-default`}>{fat}</p>
-        </li>
-        <li className={styles.nutritional_value}>
-          <p className="text mb-2">Углеводы, г</p>
-          <p className={`text text_type_digits-default`}>{carbohydrates}</p>
-        </li>
-      </ul>
-    </div>
-  );
-});
+  return <IngredientDetailsUI ingredientData={ingredientData} />;
+};
