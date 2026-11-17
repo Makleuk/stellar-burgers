@@ -1,16 +1,16 @@
-import { ProfileOrdersUI } from '@ui-pages';
-import { useEffect, type FC } from 'react';
+import { OrdersList, ProfileMenu } from '@components';
 
-import { fetchUserOrders, selectUserOrders } from '../../services/slices/feed-slice';
-import { useDispatch, useSelector } from '../../services/store';
+import type { ProfileOrdersUIProps } from './type';
 
-export const ProfileOrders: FC = () => {
-  const dispatch = useDispatch();
-  const orders = useSelector(selectUserOrders);
+import styles from './profile-orders.module.css';
 
-  useEffect(() => {
-    dispatch(fetchUserOrders());
-  }, [dispatch]);
-
-  return <ProfileOrdersUI orders={orders} />;
-};
+export const ProfileOrdersUI = ({ orders }: ProfileOrdersUIProps): React.JSX.Element => (
+  <main className={styles.main}>
+    <aside className={`${styles.menu} mr-15`}>
+      <ProfileMenu />
+    </aside>
+    <section className={`${styles.orders} custom-scroll`}>
+      <OrdersList orders={orders} />
+    </section>
+  </main>
+);

@@ -1,20 +1,40 @@
-import { ProfileMenuUI } from '@ui';
-import type { FC } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-import { logoutUser } from '../../services/slices/user-slice';
-import { useDispatch } from '../../services/store';
+import type { ProfileMenuUIProps } from './type';
 
-export const ProfileMenu: FC = () => {
-  const { pathname } = useLocation();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+import styles from './profile-menu.module.css';
 
-  const handleLogout = () => {
-    dispatch(logoutUser())
-      .unwrap()
-      .then(() => navigate('/login', { replace: true }));
-  };
-
-  return <ProfileMenuUI handleLogout={handleLogout} pathname={pathname} />;
-};
+export const ProfileMenuUI = ({
+  pathname,
+  handleLogout,
+}: ProfileMenuUIProps): React.JSX.Element => (
+  <nav className="mr-15">
+    <NavLink
+      to="/profile"
+      end
+      className={({ isActive }) =>
+        `${styles.link} text text_type_main-medium pt-4 pb-4 ${isActive ? styles.link_active : ''}`
+      }
+    >
+      Профиль
+    </NavLink>
+    <NavLink
+      to="/profile/orders"
+      className={({ isActive }) =>
+        `${styles.link} text text_type_main-medium pt-4 pb-4 ${isActive || pathname.startsWith('/profile/orders/') ? styles.link_active : ''}`
+      }
+    >
+      История заказов
+    </NavLink>
+    <button
+      type="button"
+      onClick={handleLogout}
+      className={`${styles.button} text text_type_main-medium pt-4 pb-4`}
+    >
+      Выход
+    </button>
+    <p className="text text_type_main-default text_color_inactive mt-20">
+      В этом разделе вы можете изменить свои персональные данные
+    </p>
+  </nav>
+);

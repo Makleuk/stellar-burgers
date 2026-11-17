@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       modules: { generateScopedName }
     },
     define: {
-      'process.env.BURGER_API_URL': JSON.stringify(env.BURGER_API_URL ?? '')
+      'process.env.BURGER_API_URL': JSON.stringify(env.BURGER_API_URL || 'https://norma.education-services.ru/api')
     },
     server: {
       open: true

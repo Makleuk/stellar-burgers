@@ -1,5 +1,5 @@
 import type { TIngredient, TTabMode } from '@utils-types';
-import type { RefObject } from 'react';
+import type { RefCallback, RefObject } from 'react';
 
 export type BurgerIngredientsUIProps = {
   currentTab: TTabMode;
@@ -9,8 +9,8 @@ export type BurgerIngredientsUIProps = {
   titleBunRef: RefObject<HTMLHeadingElement | null>;
   titleMainRef: RefObject<HTMLHeadingElement | null>;
   titleSaucesRef: RefObject<HTMLHeadingElement | null>;
-  bunsRef: (node?: Element | null) => void;
-  mainsRef: (node?: Element | null) => void;
-  saucesRef: (node?: Element | null) => void;
+  bunsRef: RefCallback<Element>;
+  mainsRef: RefCallback<Element>;
+  saucesRef: RefCallback<Element>;
   onTabClick: (val: string) => void;
 };

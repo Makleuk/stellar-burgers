@@ -5,5 +5,4 @@ export type TIngredientsCategoryUIProps = {
   titleRef: React.RefObject<HTMLHeadingElement | null>;
   ingredients: TIngredient[];
   ingredientsCounters: Record<string, number>;
-  ref?: React.Ref<HTMLUListElement>;
 };

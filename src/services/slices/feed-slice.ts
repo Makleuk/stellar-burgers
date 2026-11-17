@@ -1,6 +1,7 @@
 import { getFeedsApi, getOrdersApi } from '@api';
-import type { TOrder } from '@utils-types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+
+import type { TOrder } from '@utils-types';
 
 type TFeedState = {
   orders: TOrder[];
@@ -8,7 +9,9 @@ type TFeedState = {
   total: number;
   totalToday: number;
   isLoading: boolean;
+  isUserOrdersLoading: boolean;
   error: string | null;
+  userOrdersError: string | null;
 };
 
 const initialState: TFeedState = {
@@ -17,7 +20,9 @@ const initialState: TFeedState = {
   total: 0,
   totalToday: 0,
   isLoading: false,
+  isUserOrdersLoading: false,
   error: null,
+  userOrdersError: null,
 };
 
 export const fetchFeeds = createAsyncThunk('feed/fetchAll', getFeedsApi);
@@ -33,6 +38,9 @@ export const feedSlice = createSlice({
     selectFeedTotal: (state) => state.total,
     selectFeedTotalToday: (state) => state.totalToday,
     selectFeedLoading: (state) => state.isLoading,
+    selectUserOrdersLoading: (state) => state.isUserOrdersLoading,
+    selectFeedError: (state) => state.error,
+    selectUserOrdersError: (state) => state.userOrdersError,
   },
   extraReducers: (builder) => {
     builder
@@ -48,18 +56,20 @@ export const feedSlice = createSlice({
       })
       .addCase(fetchFeeds.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message ?? null;
+        state.error = action.error.message ?? 'Не удалось загрузить ленту заказов';
       })
       .addCase(fetchUserOrders.pending, (state) => {
-        state.isLoading = true;
+        state.isUserOrdersLoading = true;
+        state.userOrdersError = null;
       })
       .addCase(fetchUserOrders.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.isUserOrdersLoading = false;
         state.userOrders = action.payload;
       })
       .addCase(fetchUserOrders.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message ?? null;
+        state.isUserOrdersLoading = false;
+        state.userOrdersError =
+          action.error.message ?? 'Не удалось загрузить историю заказов';
       });
   },
 });
@@ -70,4 +80,7 @@ export const {
   selectFeedTotal,
   selectFeedTotalToday,
   selectFeedLoading,
+  selectUserOrdersLoading,
+  selectFeedError,
+  selectUserOrdersError,
 } = feedSlice.selectors;

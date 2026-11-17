@@ -1,35 +1,44 @@
-import { BurgerConstructorElementUI } from '@ui';
-import { memo, type FC } from 'react';
+import { ConstructorElement } from '@krgaa/react-developer-burger-ui-components';
 
-import { moveIngredient, removeIngredient } from '../../services/slices/constructor-slice';
-import { useDispatch } from '../../services/store';
-import type { BurgerConstructorElementProps } from './type';
+import type { BurgerConstructorElementUIProps } from './type';
 
-export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(
-  ({ ingredient, index, totalItems }) => {
-    const dispatch = useDispatch();
+import styles from './burger-constructor-element.module.css';
 
-    const handleMoveDown = () => {
-      dispatch(moveIngredient({ from: index, to: index + 1 }));
-    };
-
-    const handleMoveUp = () => {
-      dispatch(moveIngredient({ from: index, to: index - 1 }));
-    };
-
-    const handleClose = () => {
-      dispatch(removeIngredient(ingredient.id));
-    };
-
-    return (
-      <BurgerConstructorElementUI
-        ingredient={ingredient}
-        index={index}
-        totalItems={totalItems}
-        handleMoveUp={handleMoveUp}
-        handleMoveDown={handleMoveDown}
-        handleClose={handleClose}
-      />
-    );
-  }
+export const BurgerConstructorElementUI = ({
+  ingredient,
+  index,
+  totalItems,
+  handleMoveUp,
+  handleMoveDown,
+  handleClose,
+}: BurgerConstructorElementUIProps): React.JSX.Element => (
+  <div className={styles.element_fullwidth}>
+    <div
+      className="pl-2 pr-2 mb-2"
+      style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}
+    >
+      <button
+        type="button"
+        aria-label="Переместить выше"
+        disabled={index === 0}
+        onClick={handleMoveUp}
+      >
+        ↑
+      </button>
+      <button
+        type="button"
+        aria-label="Переместить ниже"
+        disabled={index === totalItems - 1}
+        onClick={handleMoveDown}
+      >
+        ↓
+      </button>
+    </div>
+    <ConstructorElement
+      text={ingredient.name}
+      price={ingredient.price}
+      thumbnail={ingredient.image}
+      handleClose={handleClose}
+    />
+  </div>
 );

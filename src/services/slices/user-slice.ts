@@ -1,5 +1,7 @@
 import {
   getUserApi,
+  forgotPasswordApi,
+  resetPasswordApi,
   loginUserApi,
   logoutApi,
   registerUserApi,
@@ -7,10 +9,11 @@ import {
   type TLoginData,
   type TRegisterData,
 } from '@api';
-import type { TUser } from '@utils-types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 import { deleteCookie, getCookie, setCookie } from '../../utils/cookie';
+
+import type { TUser } from '@utils-types';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -21,23 +24,28 @@ type TUserState = {
   error: string | null;
 };
 
-const initialState: TUserState = {
-  user: null,
-  isAuthChecked: false,
-  error: null,
-};
+const initialState: TUserState = { user: null, isAuthChecked: false, error: null };
 
-const saveTokens = (accessToken: string, refreshToken: string) => {
+const saveTokens = (accessToken: string, refreshToken: string): void => {
   setCookie(ACCESS_TOKEN_KEY, accessToken);
   localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
 };
 
+const clearTokens = (): void => {
+  deleteCookie(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
 export const checkUserAuth = createAsyncThunk('user/checkAuth', async () => {
-  if (!getCookie(ACCESS_TOKEN_KEY)) {
+  if (!getCookie(ACCESS_TOKEN_KEY) && !localStorage.getItem(REFRESH_TOKEN_KEY))
     return null;
+  try {
+    const response = await getUserApi();
+    return response.user;
+  } catch (error) {
+    clearTokens();
+    throw error;
   }
-  const response = await getUserApi();
-  return response.user;
 });
 
 export const loginUser = createAsyncThunk('user/login', async (data: TLoginData) => {
@@ -63,10 +71,23 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+export const forgotPassword = createAsyncThunk(
+  'user/forgotPassword',
+  async (data: { email: string }) => {
+    await forgotPasswordApi(data);
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'user/resetPassword',
+  async (data: { password: string; token: string }) => {
+    await resetPasswordApi(data);
+  }
+);
+
 export const logoutUser = createAsyncThunk('user/logout', async () => {
   await logoutApi();
-  deleteCookie(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  clearTokens();
 });
 
 export const userSlice = createSlice({
@@ -84,8 +105,10 @@ export const userSlice = createSlice({
         state.user = action.payload;
         state.isAuthChecked = true;
       })
-      .addCase(checkUserAuth.rejected, (state) => {
+      .addCase(checkUserAuth.rejected, (state, action) => {
+        state.user = null;
         state.isAuthChecked = true;
+        state.error = action.error.message ?? null;
       })
       .addCase(loginUser.pending, (state) => {
         state.error = null;
@@ -105,14 +128,33 @@ export const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.error = action.error.message ?? null;
       })
+      .addCase(updateUser.pending, (state) => {
+        state.error = null;
+      })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.user = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.error = action.error.message ?? null;
       })
+      .addCase(forgotPassword.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.error = action.error.message ?? null;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.error = action.error.message ?? null;
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
+        state.error = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.error = action.error.message ?? null;
       });
   },
 });

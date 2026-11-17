@@ -1,11 +1,13 @@
 import { getOrderByNumberApi, orderBurgerApi } from '@api';
-import type { TOrder } from '@utils-types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+
+import type { TOrder } from '@utils-types';
 
 type TOrderState = {
   orderRequest: boolean;
   orderModalData: TOrder | null;
   orderByNumber: TOrder | null;
+  isOrderLoading: boolean;
   error: string | null;
 };
 
@@ -13,6 +15,7 @@ const initialState: TOrderState = {
   orderRequest: false,
   orderModalData: null,
   orderByNumber: null,
+  isOrderLoading: false,
   error: null,
 };
 
@@ -28,6 +31,7 @@ export const fetchOrderByNumber = createAsyncThunk(
   'order/fetchByNumber',
   async (orderNumber: number) => {
     const response = await getOrderByNumberApi(orderNumber);
+    if (!response.orders?.length) throw new Error('Заказ не найден');
     return response.orders[0];
   }
 );
@@ -43,6 +47,8 @@ export const orderSlice = createSlice({
   selectors: {
     selectOrderRequest: (state) => state.orderRequest,
     selectOrderModalData: (state) => state.orderModalData,
+    selectOrderLoading: (state) => state.isOrderLoading,
+    selectOrderError: (state) => state.error,
   },
   extraReducers: (builder) => {
     builder
@@ -56,13 +62,27 @@ export const orderSlice = createSlice({
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.orderRequest = false;
-        state.error = action.error.message ?? null;
+        state.error = action.error.message ?? 'Не удалось оформить заказ';
+      })
+      .addCase(fetchOrderByNumber.pending, (state) => {
+        state.isOrderLoading = true;
+        state.error = null;
       })
       .addCase(fetchOrderByNumber.fulfilled, (state, action) => {
-        state.orderByNumber = action.payload ?? null;
+        state.isOrderLoading = false;
+        state.orderByNumber = action.payload;
+      })
+      .addCase(fetchOrderByNumber.rejected, (state, action) => {
+        state.isOrderLoading = false;
+        state.error = action.error.message ?? 'Не удалось загрузить заказ';
       });
   },
 });
 
 export const { resetOrderModal } = orderSlice.actions;
-export const { selectOrderRequest, selectOrderModalData } = orderSlice.selectors;
+export const {
+  selectOrderRequest,
+  selectOrderModalData,
+  selectOrderLoading,
+  selectOrderError,
+} = orderSlice.selectors;

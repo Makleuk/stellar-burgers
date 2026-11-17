@@ -24,11 +24,12 @@ import { fetchIngredients } from '../../services/slices/ingredients-slice';
 import { checkUserAuth } from '../../services/slices/user-slice';
 import { useDispatch } from '../../services/store';
 import { ProtectedRoute } from '../protected-route/protected-route';
+
 import styles from './app.module.css';
 
 type TLocationState = { background?: Location } | null;
 
-const App = () => {
+const App = (): React.JSX.Element => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,12 +40,12 @@ const App = () => {
   const orderTitle = `#${orderNumber ?? ''}`;
 
   useEffect(() => {
-    dispatch(fetchIngredients());
-    dispatch(checkUserAuth());
+    void dispatch(fetchIngredients());
+    void dispatch(checkUserAuth());
   }, [dispatch]);
 
-  const handleModalClose = () => {
-    navigate(-1);
+  const handleModalClose = (): void => {
+    void navigate(-1);
   };
 
   return (
@@ -127,7 +128,10 @@ const App = () => {
           <Route
             path="/ingredients/:id"
             element={
-              <Modal title="Детали ингредиента" onClose={handleModalClose}>
+              <Modal
+                title="Р”РµС‚Р°Р»Рё РёРЅРіСЂРµРґРёРµРЅС‚Р°"
+                onClose={handleModalClose}
+              >
                 <IngredientDetails />
               </Modal>
             }

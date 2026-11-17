@@ -1,7 +1,8 @@
-import type { TConstructorIngredient, TIngredient } from '@utils-types';
 import { createSlice, nanoid, type PayloadAction } from '@reduxjs/toolkit';
 
 import { createOrder } from './order-slice';
+
+import type { TConstructorIngredient, TIngredient } from '@utils-types';
 
 type TConstructorState = {
   bun: TConstructorIngredient | null;
@@ -38,8 +39,16 @@ export const constructorSlice = createSlice({
     },
     moveIngredient: (state, action: PayloadAction<TMovePayload>) => {
       const { from, to } = action.payload;
+      if (
+        from < 0 ||
+        from >= state.ingredients.length ||
+        to < 0 ||
+        to >= state.ingredients.length ||
+        from === to
+      )
+        return;
       const [movedIngredient] = state.ingredients.splice(from, 1);
-      state.ingredients.splice(to, 0, movedIngredient);
+      if (movedIngredient) state.ingredients.splice(to, 0, movedIngredient);
     },
     clearConstructor: () => initialState,
   },

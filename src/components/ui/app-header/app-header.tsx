@@ -4,21 +4,21 @@ import {
   Logo,
   ProfileIcon,
 } from '@krgaa/react-developer-burger-ui-components';
-import clsx from 'clsx';
-import type { FC } from 'react';
 import { NavLink } from 'react-router-dom';
 
-import styles from './app-header.module.css';
 import type { TAppHeaderUIProps } from './type';
+import type { FC } from 'react';
 
-const getTextClassName = (isActive: boolean) =>
-  clsx('text text_type_main-default ml-2', !isActive && 'text_color_inactive');
+import styles from './app-header.module.css';
+
+const getTextClassName = (isActive: boolean): string =>
+  `text text_type_main-default ml-2 ${isActive ? '' : 'text_color_inactive'}`;
 
 export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => (
   <header className={styles.header}>
-    <nav className={clsx(styles.menu, 'p-4')}>
+    <nav className={`${styles.menu} p-4`}>
       <div className={styles.menu_part_left}>
-        <NavLink to="/" end className={clsx(styles.link, 'mr-10')}>
+        <NavLink to="/" end className={`${styles.link} mr-10`}>
           {({ isActive }) => (
             <>
               <BurgerIcon type={isActive ? 'primary' : 'secondary'} />
@@ -44,7 +44,7 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => (
         {({ isActive }) => (
           <>
             <ProfileIcon type={isActive ? 'primary' : 'secondary'} />
-            <p className={getTextClassName(isActive)}>{userName || 'Личный кабинет'}</p>
+            <p className={getTextClassName(isActive)}>{userName ?? 'Личный кабинет'}</p>
           </>
         )}
       </NavLink>
