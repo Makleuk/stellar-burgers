@@ -15,7 +15,6 @@ import {
   Route,
   Routes,
   useLocation,
-  useMatch,
   useNavigate,
   type Location,
 } from 'react-router-dom';
@@ -34,10 +33,6 @@ const App = (): React.JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
   const background = (location.state as TLocationState)?.background;
-  const feedMatch = useMatch('/feed/:number');
-  const profileOrderMatch = useMatch('/profile/orders/:number');
-  const orderNumber = feedMatch?.params.number ?? profileOrderMatch?.params.number;
-  const orderTitle = `#${orderNumber ?? ''}`;
 
   useEffect(() => {
     void dispatch(fetchIngredients());
@@ -120,7 +115,7 @@ const App = (): React.JSX.Element => {
           <Route
             path="/feed/:number"
             element={
-              <Modal title={orderTitle} onClose={handleModalClose}>
+              <Modal title="" onClose={handleModalClose}>
                 <OrderInfo />
               </Modal>
             }
@@ -128,10 +123,7 @@ const App = (): React.JSX.Element => {
           <Route
             path="/ingredients/:id"
             element={
-              <Modal
-                title="Р”РµС‚Р°Р»Рё РёРЅРіСЂРµРґРёРµРЅС‚Р°"
-                onClose={handleModalClose}
-              >
+              <Modal title="Детали ингредиента" onClose={handleModalClose}>
                 <IngredientDetails />
               </Modal>
             }
@@ -140,7 +132,7 @@ const App = (): React.JSX.Element => {
             path="/profile/orders/:number"
             element={
               <ProtectedRoute>
-                <Modal title={orderTitle} onClose={handleModalClose}>
+                <Modal title="" onClose={handleModalClose}>
                   <OrderInfo />
                 </Modal>
               </ProtectedRoute>
