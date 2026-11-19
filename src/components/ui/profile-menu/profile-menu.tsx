@@ -8,38 +8,33 @@ export const ProfileMenuUI = ({
   pathname,
   handleLogout,
 }: ProfileMenuUIProps): React.JSX.Element => (
-  <>
+  <nav className="mr-15">
     <NavLink
-      to={'/profile'}
-      className={({ isActive }) =>
-        `text text_type_main-medium text_color_inactive pt-4 pb-4 ${
-          styles.link
-        } ${isActive ? styles.link_active : ''}`
-      }
+      to="/profile"
       end
+      className={({ isActive }) =>
+        `${styles.link} text text_type_main-medium pt-4 pb-4 ${isActive ? styles.link_active : ''}`
+      }
     >
       Профиль
     </NavLink>
     <NavLink
-      to={'/profile/orders'}
+      to="/profile/orders"
       className={({ isActive }) =>
-        `text text_type_main-medium text_color_inactive pt-4 pb-4 ${
-          styles.link
-        } ${isActive ? styles.link_active : ''}`
+        `${styles.link} text text_type_main-medium pt-4 pb-4 ${isActive || pathname.startsWith('/profile/orders/') ? styles.link_active : ''}`
       }
     >
       История заказов
     </NavLink>
     <button
-      className={`text text_type_main-medium text_color_inactive pt-4 pb-4 ${styles.button}`}
+      type="button"
       onClick={handleLogout}
+      className={`${styles.button} text text_type_main-medium pt-4 pb-4`}
     >
       Выход
     </button>
-    <p className="pt-20 text text_type_main-default text_color_inactive">
-      {pathname === '/profile'
-        ? 'В этом разделе вы можете изменить свои персональные данные'
-        : 'В этом разделе вы можете просмотреть свою историю заказов'}
+    <p className="text text_type_main-default text_color_inactive mt-20">
+      В этом разделе вы можете изменить свои персональные данные
     </p>
-  </>
+  </nav>
 );

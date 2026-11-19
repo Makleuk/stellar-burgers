@@ -4,10 +4,9 @@ import {
   ConstructorElement,
   CurrencyIcon,
 } from '@krgaa/react-developer-burger-ui-components';
-import { Preloader, OrderDetailsUI } from '@ui';
+import { OrderDetailsUI } from '@ui';
 
 import type { BurgerConstructorUIProps } from './type';
-import type { TConstructorIngredient } from '@utils-types';
 
 import styles from './burger-constructor.module.css';
 
@@ -16,12 +15,13 @@ export const BurgerConstructorUI = ({
   orderRequest,
   price,
   orderModalData,
+  error,
   onOrderClick,
   closeOrderModal,
 }: BurgerConstructorUIProps): React.JSX.Element => (
-  <section className={styles.burger_constructor}>
-    {constructorItems.bun ? (
-      <div className={`${styles.element} mb-4 mr-4`}>
+  <section className={`${styles.burger_constructor} pl-4`}>
+    <div className={`${styles.element} mb-4`}>
+      {constructorItems.bun ? (
         <ConstructorElement
           type="top"
           isLocked
@@ -29,34 +29,26 @@ export const BurgerConstructorUI = ({
           price={constructorItems.bun.price}
           thumbnail={constructorItems.bun.image}
         />
-      </div>
-    ) : (
-      <div
-        className={`${styles.noBuns} ${styles.noBunsTop} ml-8 mb-4 mr-5 text text_type_main-default`}
-      >
-        Выберите булки
-      </div>
-    )}
-    <ul className={styles.elements}>
-      {constructorItems.ingredients.length > 0 ? (
-        constructorItems.ingredients.map(
-          (item: TConstructorIngredient, index: number) => (
-            <BurgerConstructorElement
-              ingredient={item}
-              index={index}
-              totalItems={constructorItems.ingredients.length}
-              key={item.id}
-            />
-          )
-        )
       ) : (
-        <li className={`${styles.noBuns} ml-8 mb-4 mr-5 text text_type_main-default`}>
-          Выберите начинку
+        <div className={`${styles.noBuns} ${styles.noBunsTop}`}>Выберите булку</div>
+      )}
+    </div>
+    <ul className={`${styles.elements} custom-scroll`}>
+      {constructorItems.ingredients.map((ingredient, index) => (
+        <li className={`${styles.element} mb-4`} key={ingredient.id}>
+          <BurgerConstructorElement
+            ingredient={ingredient}
+            index={index}
+            totalItems={constructorItems.ingredients.length}
+          />
         </li>
+      ))}
+      {!constructorItems.ingredients.length && (
+        <li className={`${styles.noBuns} mb-4`}>Добавьте начинку или соус</li>
       )}
     </ul>
-    {constructorItems.bun ? (
-      <div className={`${styles.element} mt-4 mr-4`}>
+    <div className={`${styles.element} mt-4`}>
+      {constructorItems.bun ? (
         <ConstructorElement
           type="bottom"
           isLocked
@@ -64,32 +56,32 @@ export const BurgerConstructorUI = ({
           price={constructorItems.bun.price}
           thumbnail={constructorItems.bun.image}
         />
-      </div>
-    ) : (
-      <div
-        className={`${styles.noBuns} ${styles.noBunsBottom} ml-8 mb-4 mr-5 text text_type_main-default`}
-      >
-        Выберите булки
-      </div>
+      ) : (
+        <div className={`${styles.noBuns} ${styles.noBunsBottom}`}>Выберите булку</div>
+      )}
+    </div>
+    {error && (
+      <p className="text text_type_main-default mt-4" role="alert">
+        {error}
+      </p>
     )}
     <div className={`${styles.total} mt-10 mr-4`}>
       <div className={`${styles.cost} mr-10`}>
-        <p className={`text ${styles.text} mr-2`}>{price}</p>
+        <span className={`${styles.text} mr-2`}>{price}</span>
         <CurrencyIcon type="primary" />
       </div>
-      <Button htmlType="button" type="primary" size="large" onClick={onOrderClick}>
-        Оформить заказ
+      <Button
+        htmlType="button"
+        type="primary"
+        size="large"
+        disabled={!constructorItems.bun || orderRequest}
+        onClick={onOrderClick}
+      >
+        {orderRequest ? 'Оформляем…' : 'Оформить заказ'}
       </Button>
     </div>
-
-    {orderRequest && (
-      <Modal onClose={closeOrderModal} title={'Оформляем заказ...'}>
-        <Preloader />
-      </Modal>
-    )}
-
     {orderModalData && (
-      <Modal onClose={closeOrderModal} title={orderRequest ? 'Оформляем заказ...' : ''}>
+      <Modal title="Ваш заказ" onClose={closeOrderModal}>
         <OrderDetailsUI orderNumber={orderModalData.number} />
       </Modal>
     )}

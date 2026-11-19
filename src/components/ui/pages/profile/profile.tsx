@@ -1,5 +1,9 @@
 import { ProfileMenu } from '@components';
-import { Button, Input } from '@krgaa/react-developer-burger-ui-components';
+import {
+  Input,
+  PasswordInput,
+  Button,
+} from '@krgaa/react-developer-burger-ui-components';
 
 import type { ProfileUIProps } from './type';
 
@@ -8,77 +12,63 @@ import styles from './profile.module.css';
 export const ProfileUI = ({
   formValue,
   isFormChanged,
-  updateUserError,
   handleSubmit,
   handleCancel,
   handleInputChange,
+  updateUserError,
 }: ProfileUIProps): React.JSX.Element => (
   <main className={styles.container}>
-    <div className={`mt-30 mr-15 ${styles.menu}`}>
+    <aside className={styles.menu}>
       <ProfileMenu />
-    </div>
-    <form className={`mt-30 ${styles.form}`} onSubmit={handleSubmit}>
-      <>
-        <div className="pb-6">
+    </aside>
+    <section className="pt-10">
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className="mb-6">
           <Input
-            type={'text'}
-            placeholder={'Имя'}
-            onChange={handleInputChange}
+            type="text"
+            placeholder="Имя"
             value={formValue.name}
-            name={'name'}
-            error={false}
-            errorText={''}
-            size={'default'}
-            icon={'EditIcon'}
+            onChange={handleInputChange}
+            name="name"
           />
         </div>
-        <div className="pb-6">
+        <div className="mb-6">
           <Input
-            type={'email'}
-            placeholder={'E-mail'}
-            onChange={handleInputChange}
+            type="email"
+            placeholder="Логин"
             value={formValue.email}
-            name={'email'}
-            error={false}
-            errorText={''}
-            size={'default'}
-            icon={'EditIcon'}
-          />
-        </div>
-        <div className="pb-6">
-          <Input
-            type={'password'}
-            placeholder={'Пароль'}
             onChange={handleInputChange}
-            value={formValue.password}
-            name={'password'}
-            error={false}
-            errorText={''}
-            size={'default'}
-            icon={'EditIcon'}
+            name="email"
           />
         </div>
+        <div className="mb-6">
+          <PasswordInput
+            value={formValue.password}
+            onChange={handleInputChange}
+            name="password"
+          />
+        </div>
+        {updateUserError && (
+          <p className={`${styles.error} text text_type_main-default mb-4`}>
+            {updateUserError}
+          </p>
+        )}
         {isFormChanged && (
-          <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
             <Button
-              type="secondary"
               htmlType="button"
+              type="secondary"
               size="medium"
               onClick={handleCancel}
             >
-              Отменить
+              Отмена
             </Button>
-            <Button type="primary" size="medium" htmlType="submit">
+            <Button htmlType="submit" type="primary" size="medium">
               Сохранить
             </Button>
           </div>
         )}
-        {updateUserError && (
-          <p className={`${styles.error} pt-5 text text_type_main-default`}>
-            {updateUserError}
-          </p>
-        )}
-      </>
-    </form>
+      </form>
+    </section>
   </main>
 );

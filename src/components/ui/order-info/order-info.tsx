@@ -1,51 +1,50 @@
 import { OrderStatus } from '@components';
-import {
-  CurrencyIcon,
-  FormattedDate,
-} from '@krgaa/react-developer-burger-ui-components';
-import { memo } from 'react';
+import { CurrencyIcon } from '@krgaa/react-developer-burger-ui-components';
 
 import type { OrderInfoUIProps } from './type';
 
 import styles from './order-info.module.css';
 
-export const OrderInfoUI = memo(function OrderInfoUI({
-  orderInfo,
-}: OrderInfoUIProps): React.JSX.Element {
-  return (
-    <div className={styles.wrap}>
-      <h3 className={`text text_type_main-medium  pb-3 pt-10 ${styles.header}`}>
-        {orderInfo.name}
-      </h3>
-      <OrderStatus status={orderInfo.status} />
-      <p className={`text text_type_main-medium pt-15 pb=6`}>Состав:</p>
-      <ul className={`${styles.list} mb-8`}>
-        {Object.values(orderInfo.ingredientsInfo).map((item, index) => (
-          <li className={`pb-4 pr-6 ${styles.item}`} key={index}>
-            <div className={styles.img_wrap}>
-              <div className={styles.border}>
-                <img className={styles.img} src={item.image_mobile} alt={item.name} />
-              </div>
+const formatDate = (date: Date): string =>
+  new Intl.DateTimeFormat('ru-RU', { dateStyle: 'long', timeStyle: 'short' }).format(
+    date
+  );
+
+export const OrderInfoUI = ({ orderInfo }: OrderInfoUIProps): React.JSX.Element => (
+  <article className={`${styles.wrap} pt-4`}>
+    <p className="text text_type_digits-default mb-10">#{orderInfo.number}</p>
+    <h2 className={`${styles.header} text text_type_main-medium mb-3`}>
+      {orderInfo.name}
+    </h2>
+    <OrderStatus status={orderInfo.status} />
+    <h3 className="text text_type_main-medium mt-10 mb-6">Состав:</h3>
+    <ul className={styles.list}>
+      {Object.entries(orderInfo.ingredientsInfo).map(([id, ingredient]) => (
+        <li className={`${styles.item} mb-4`} key={id}>
+          <div className={styles.img_wrap}>
+            <div className={styles.border}>
+              <img
+                className={styles.img}
+                src={ingredient.image_mobile}
+                alt={ingredient.name}
+              />
             </div>
-            <span className="text text_type_main-default pl-4">{item.name}</span>
-            <span
-              className={`text text_type_digits-default pl-4 pr-4 ${styles.quantity}`}
-            >
-              {item.count} x {item.price}
-            </span>
-            <CurrencyIcon type={'primary'} />
-          </li>
-        ))}
-      </ul>
-      <div className={styles.bottom}>
-        <p className="text text_type_main-default text_color_inactive">
-          <FormattedDate date={orderInfo.date} />
-        </p>
-        <span className={`text text_type_digits-default pr-4 ${styles.total}`}>
-          {orderInfo.total}
-        </span>
-        <CurrencyIcon type={'primary'} />
+          </div>
+          <span className="text text_type_main-default ml-4">{ingredient.name}</span>
+          <span className={`${styles.quantity} text text_type_digits-default`}>
+            {ingredient.count} × {ingredient.price}
+          </span>
+        </li>
+      ))}
+    </ul>
+    <div className={`${styles.bottom} mt-10`}>
+      <span className="text text_type_main-default text_color_inactive">
+        {formatDate(orderInfo.date)}
+      </span>
+      <div className={styles.total}>
+        <span className="text text_type_digits-default mr-2">{orderInfo.total}</span>
+        <CurrencyIcon type="primary" />
       </div>
     </div>
-  );
-});
+  </article>
+);

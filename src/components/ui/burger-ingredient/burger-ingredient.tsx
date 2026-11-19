@@ -1,39 +1,42 @@
 import {
+  Button,
   Counter,
   CurrencyIcon,
-  AddButton,
 } from '@krgaa/react-developer-burger-ui-components';
-import { memo } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { TBurgerIngredientUIProps } from './type';
 
 import styles from './burger-ingredient.module.css';
 
-export const BurgerIngredientUI = memo(function BurgerIngredientUI({
+export const BurgerIngredientUI = ({
   ingredient,
   count,
-  handleAdd,
   locationState,
-}: TBurgerIngredientUIProps): React.JSX.Element {
-  const { image, price, name, _id } = ingredient;
-
-  return (
-    <li className={styles.container}>
-      <Link className={styles.article} to={`/ingredients/${_id}`} state={locationState}>
-        {count && <Counter count={count} />}
-        <img src={image} alt="картинка ингредиента." />
-        <div className={`${styles.cost} mt-2 mb-2`}>
-          <p className="text text_type_digits-default mr-2">{price}</p>
-          <CurrencyIcon type="primary" />
-        </div>
-        <p className={`text text_type_main-default ${styles.text}`}>{name}</p>
-      </Link>
-      <AddButton
-        text="Добавить"
-        onClick={handleAdd}
-        extraClass={`${styles.addButton} mt-8`}
-      />
-    </li>
-  );
-});
+  handleAdd,
+}: TBurgerIngredientUIProps): React.JSX.Element => (
+  <article className={`${styles.container} mb-8`}>
+    <Link
+      to={`/ingredients/${ingredient._id}`}
+      state={locationState}
+      className={styles.article}
+    >
+      {count > 0 && <Counter count={count} size="default" />}
+      <img className="pl-4 pr-4" src={ingredient.image} alt={ingredient.name} />
+      <div className={`${styles.cost} mt-1 mb-1`}>
+        <span className="text text_type_digits-default mr-2">{ingredient.price}</span>
+        <CurrencyIcon type="primary" />
+      </div>
+      <p className={`${styles.text} text text_type_main-default`}>{ingredient.name}</p>
+    </Link>
+    <Button
+      htmlType="button"
+      type="primary"
+      size="small"
+      extraClass={`${styles.addButton} mt-2`}
+      onClick={handleAdd}
+    >
+      Добавить
+    </Button>
+  </article>
+);
