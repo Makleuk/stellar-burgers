@@ -19,7 +19,10 @@ export const BurgerConstructorUI = ({
   onOrderClick,
   closeOrderModal,
 }: BurgerConstructorUIProps): React.JSX.Element => (
-  <section className={`${styles.burger_constructor} pl-4`}>
+  <section
+    className={`${styles.burger_constructor} pl-4`}
+    data-testid="burger-constructor"
+  >
     <div className={`${styles.element} mb-4`}>
       {constructorItems.bun ? (
         <ConstructorElement
@@ -81,7 +84,7 @@ export const BurgerConstructorUI = ({
       </Button>
     </div>
     {orderModalData && (
-      <Modal title="Ваш заказ" onClose={closeOrderModal}>
+      <Modal title="Ваш заказ" onClose={closeOrderModal} testId="order-modal">
         <OrderDetailsUI orderNumber={orderModalData.number} />
       </Modal>
     )}

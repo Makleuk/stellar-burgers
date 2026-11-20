@@ -123,7 +123,11 @@ const App = (): React.JSX.Element => {
           <Route
             path="/ingredients/:id"
             element={
-              <Modal title="Детали ингредиента" onClose={handleModalClose}>
+              <Modal
+                title="Детали ингредиента"
+                onClose={handleModalClose}
+                testId="ingredient-modal"
+              >
                 <IngredientDetails />
               </Modal>
             }
