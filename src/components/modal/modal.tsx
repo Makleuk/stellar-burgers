@@ -10,6 +10,7 @@ export const Modal = memo(function Modal({
   title,
   onClose,
   children,
+  testId,
 }: TModalProps): React.JSX.Element {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent): void => {
@@ -23,7 +24,7 @@ export const Modal = memo(function Modal({
   }, [onClose]);
 
   return ReactDOM.createPortal(
-    <ModalUI title={title} onClose={onClose}>
+    <ModalUI title={title} onClose={onClose} testId={testId}>
       {children}
     </ModalUI>,
     modalRoot as HTMLDivElement
